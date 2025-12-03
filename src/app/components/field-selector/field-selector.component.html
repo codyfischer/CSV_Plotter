@@ -1,0 +1,60 @@
+<div class="field-selector-container">
+  <div class="controls-section">
+    <div class="header-row">
+      <div class="title-and-dropdown">
+        <h3>CSV Data Plotter</h3>
+        <mat-form-field appearance="outline" class="field-dropdown">
+          <mat-label>Add field to plot</mat-label>
+          <mat-select 
+            [(value)]="selectedFieldKey" 
+            [disabled]="unselectedFields.length === 0"
+            (selectionChange)="onFieldSelectionChange()">
+            <mat-option value="">Choose a field...</mat-option>
+            <mat-option *ngFor="let field of unselectedFields" [value]="field.key">
+              {{ field.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      <div class="action-buttons">
+        <label for="csv-file" class="upload-button">
+          <mat-icon>upload_file</mat-icon>
+          Upload CSV
+        </label>
+        <input 
+          id="csv-file" 
+          type="file" 
+          accept=".csv" 
+          (change)="onFileSelected($event)"
+          style="display: none;">
+        
+        <button mat-stroked-button (click)="onZoomOut()" class="zoom-button" [disabled]="!hasZoom">
+          <mat-icon>zoom_out</mat-icon>
+          Zoom Out
+        </button>
+        
+        <button mat-stroked-button (click)="onClearZoom()" class="zoom-button">
+          <mat-icon>zoom_out_map</mat-icon>
+          Reset Zoom
+        </button>
+      </div>
+    </div>
+
+    <div class="selected-fields" *ngIf="selectedFields.length > 0">
+      <div class="field-chips">
+        <mat-chip-set>
+          <mat-chip 
+            *ngFor="let field of selectedFields" 
+            [removable]="true"
+            (removed)="onFieldRemove(field)"
+            class="field-chip">
+            <span class="field-color-indicator" [style.background-color]="field.color"></span>
+            {{ field.label }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+  </div>
+</div>

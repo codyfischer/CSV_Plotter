@@ -1,0 +1,57 @@
+<div class="app-container">
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <app-field-selector 
+      [availableFields]="availableFields"
+      [selectedFields]="selectedFields"
+      (fieldSelected)="onFieldSelected($event)"
+      (fieldRemoved)="onFieldRemoved($event)"
+      (fileUpload)="onFileUpload($event)"
+      (clearZoom)="onClearZoom()">
+    </app-field-selector>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Charts Section (Left 2/3) -->
+    <div class="charts-section">
+      <div class="charts-container">
+        <div *ngFor="let field of selectedFields">
+          <app-chart 
+            *ngIf="field.dataType === 'number'"
+            [data]="data"
+            [field]="field"
+            [height]="180">
+          </app-chart>
+          <app-state-chart
+            *ngIf="field.dataType === 'string'"
+            [data]="data"
+            [field]="field"
+            [height]="120">
+          </app-state-chart>
+  </div>
+
+        <div *ngIf="data.length === 0" class="no-data-message">
+          <mat-icon>cloud_upload</mat-icon>
+          <h3>Welcome to CSV Data Plotter</h3>
+          <p>Upload a CSV file to get started with interactive data visualization</p>
+          <ul>
+            <li>Automatic field detection (numeric & categorical)</li>
+            <li>Interactive time-series charts</li>
+            <li>Geographic map visualization</li>
+            <li>Synchronized zoom and hover across all charts</li>
+          </ul>
+        </div>
+        <div *ngIf="data.length > 0 && selectedFields.length === 0" class="no-charts-message">
+          <mat-icon>info</mat-icon>
+          <p>Select fields from the dropdown above to display charts</p>
+        </div>
+      </div>
+  </div>
+
+    <!-- Map Section (Right 1/3) -->
+    <div class="map-section">
+      <app-map [data]="data"></app-map>
+  </div>
+  </div>
+</div>

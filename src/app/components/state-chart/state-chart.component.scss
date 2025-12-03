@@ -1,0 +1,59 @@
+.state-chart-container {
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin-bottom: 8px;
+  padding: 12px;
+}
+
+.chart-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.chart-svg-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+:host ::ng-deep .brush .selection {
+  fill: rgba(31, 119, 180, 0.2);
+  stroke: rgba(31, 119, 180, 0.5);
+  stroke-width: 1px;
+}
+
+:host ::ng-deep .axis text {
+  font-size: 12px;
+  fill: #666;
+}
+
+:host ::ng-deep .axis path,
+:host ::ng-deep .axis line {
+  fill: none;
+  stroke: #ccc;
+  shape-rendering: crispEdges;
+}
+
+:host ::ng-deep .y-label {
+  font-size: 12px;
+  fill: #666;
+}
+
+:host ::ng-deep .state-segment {
+  cursor: pointer;
+}
+
+:host ::ng-deep .state-segment:hover {
+  opacity: 0.9 !important;
+}
+
+:host ::ng-deep .legend-item text {
+  font-family: 'Roboto', sans-serif;
+}
+
+:host ::ng-deep .centerline {
+  pointer-events: none;
+  z-index: 1;
+}
