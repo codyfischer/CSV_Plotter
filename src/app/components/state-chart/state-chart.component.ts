@@ -53,7 +53,6 @@ export class StateChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(): void {
-    console.log('State chart ngOnChanges called for field:', this.field?.key, 'data length:', this.data.length);
     if (this.svg && this.data.length > 0) {
       this.updateChart();
     }
@@ -385,9 +384,7 @@ export class StateChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private onBrush(event: any): void {
-    console.log('State chart brush event triggered:', event);
     if (!event.selection) {
-      console.log('No brush selection in state chart');
       return;
     }
 
@@ -395,7 +392,6 @@ export class StateChartComponent implements OnInit, OnDestroy, OnChanges {
     const start = this.xScale.invert(x0);
     const end = this.xScale.invert(x1);
 
-    console.log('State chart brush selection:', { x0, x1, start, end });
     const timeRange: TimeRange = { start, end };
     this.syncService.emitZoom(timeRange);
     

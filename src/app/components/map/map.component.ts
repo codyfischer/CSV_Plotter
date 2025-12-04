@@ -48,11 +48,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(): void {
-    console.log('Map ngOnChanges called with data length:', this.data.length);
     if (this.isInitialized && this.data.length > 0) {
-      console.log('Map updating path with data:', this.data[0]);
-      console.log('First GPS location:', this.data[0].latitude, this.data[0].longitude);
-      
       // Ensure map is properly sized before updating
       setTimeout(() => {
         this.map.invalidateSize();
@@ -71,15 +67,10 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
     });
 
     // Initialize the map
-    console.log('Map container element:', this.mapContainer.nativeElement);
-    console.log('Map container dimensions:', this.mapContainer.nativeElement.offsetWidth, 'x', this.mapContainer.nativeElement.offsetHeight);
-    
     this.map = L.map(this.mapContainer.nativeElement, {
       center: [37.7749, -122.4194], // Default to San Francisco
       zoom: 13
     });
-
-    console.log('Map initialized:', this.map);
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -102,10 +93,8 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
     // Force map to recalculate its size
     setTimeout(() => {
       this.map.invalidateSize();
-      console.log('Map size invalidated');
       
       if (this.data.length > 0) {
-        console.log('Initial data available, updating map to first GPS location');
         this.updatePath();
       }
     }, 200);
@@ -115,9 +104,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
     this.syncService.hover$
       .pipe(takeUntil(this.destroy$))
       .subscribe(hoverEvent => {
-        console.log('Map received hover event:', hoverEvent);
         if (hoverEvent) {
-          console.log('Updating map position to:', hoverEvent.dataPoint.latitude, hoverEvent.dataPoint.longitude);
           this.updateCurrentPosition(hoverEvent.dataPoint);
         }
       });
@@ -134,7 +121,6 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
         if (timeRange) {
           // Prevent multiple zoom operations for the same time range
           if (this.isUpdatingZoom) {
-            console.log('Map zoom update already in progress, skipping');
             return;
           }
           
@@ -142,7 +128,6 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
           if (this.lastZoomTimeRange && 
               Math.abs(this.lastZoomTimeRange.start.getTime() - timeRange.start.getTime()) < 1000 &&
               Math.abs(this.lastZoomTimeRange.end.getTime() - timeRange.end.getTime()) < 1000) {
-            console.log('Map received duplicate zoom event, skipping');
             return;
           }
           
@@ -197,22 +182,18 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private updateCurrentPosition(dataPoint: DataPoint): void {
-    console.log('updateCurrentPosition called with:', dataPoint.latitude, dataPoint.longitude);
     if (!this.currentMarker) {
-      console.log('No current marker found');
       return;
     }
 
     if (!dataPoint.latitude || !dataPoint.longitude) {
-      console.log('Invalid lat/lng in dataPoint:', dataPoint);
       return;
     }
 
     const latlng: L.LatLngExpression = [dataPoint.latitude, dataPoint.longitude];
-    console.log('Setting marker position to:', latlng);
     this.currentMarker.setLatLng(latlng);
 
-    // Optionally pan to the current position (comment out if too distracting)
+    // Optionally pan to the current position
     // this.map.panTo(latlng);
   }
 
@@ -221,12 +202,10 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
 
     const firstPoint = this.data[0];
     if (!firstPoint.latitude || !firstPoint.longitude) {
-      console.log('Invalid GPS coordinates in first data point');
       return;
     }
 
     const firstLocation: L.LatLngExpression = [firstPoint.latitude, firstPoint.longitude];
-    console.log('Centering map on first GPS location:', firstLocation);
     
     // Center the map on the first GPS location with a good zoom level
     this.map.setView(firstLocation, 15, { animate: false });
@@ -240,7 +219,6 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
 
     // Double-check we're not already updating
     if (this.isUpdatingZoom) {
-      console.log('Map zoom update already in progress, skipping duplicate call');
       return;
     }
 
@@ -254,7 +232,6 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
       );
 
       if (filteredData.length === 0) {
-        console.log('No data points in time range, skipping map update');
         return;
       }
 
@@ -292,8 +269,6 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
       if (filteredData.length > 0) {
         this.updateCurrentPosition(filteredData[0]);
       }
-
-      console.log('Map updated for time range:', timeRange, 'showing', filteredData.length, 'points');
     } catch (error) {
       console.error('Error updating map for time range:', error);
     } finally {

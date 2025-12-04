@@ -61,15 +61,9 @@ export class CsvService {
           dataPoint['datetime'] = new Date(value);
         } else if (header === metadata.latitudeField) {
           const lat = parseFloat(value);
-          if (isNaN(lat)) {
-            console.log('Invalid latitude value:', value, 'for header:', header);
-          }
           dataPoint['latitude'] = lat;
         } else if (header === metadata.longitudeField) {
           const lng = parseFloat(value);
-          if (isNaN(lng)) {
-            console.log('Invalid longitude value:', value, 'for header:', header);
-          }
           dataPoint['longitude'] = lng;
         } else if (metadata.numericFields.includes(header)) {
           // Handle null/empty values in numeric fields
@@ -108,13 +102,6 @@ export class CsvService {
       }));
 
     const fields = [...numericPlotFields, ...categoricalPlotFields];
-    
-    // Debug: Log the final field classification
-    console.log('Final field classification:', {
-      numericFields: numericPlotFields.map(f => ({ key: f.key, dataType: f.dataType })),
-      categoricalFields: categoricalPlotFields.map(f => ({ key: f.key, dataType: f.dataType })),
-      allFields: fields.map(f => ({ key: f.key, dataType: f.dataType }))
-    });
 
     return { data, metadata, fields };
   }
@@ -157,15 +144,6 @@ export class CsvService {
       }
     });
 
-    console.log('CSV Analysis Results:', {
-      headers,
-      numericFields,
-      categoricalFields,
-      dateTimeField,
-      latitudeField,
-      longitudeField
-    });
-
     return {
       headers,
       numericFields,
@@ -181,13 +159,6 @@ export class CsvService {
     let hasStringData = false;
     let hasNumericData = false;
     let totalValues = 0;
-    
-    // Debug: Log the first few values being tested for this column
-    const sampleValues = dataLines.slice(0, Math.min(5, dataLines.length)).map(line => {
-      const values = line.split(',');
-      return values[columnIndex] ? values[columnIndex].trim() : '';
-    });
-    console.log(`Testing column ${columnIndex} for data types. Sample values:`, sampleValues);
     
     for (const line of dataLines) {
       const values = line.split(',');
@@ -211,8 +182,6 @@ export class CsvService {
     // 2. It has NO string data (only numbers and nulls)
     // 3. We have enough data to analyze
     const isNumeric = hasNumericData && !hasStringData && totalValues > 0;
-    
-    console.log(`Column ${columnIndex}: hasNumericData=${hasNumericData}, hasStringData=${hasStringData}, totalValues=${totalValues}, isNumeric=${isNumeric}`);
     
     return isNumeric;
   }

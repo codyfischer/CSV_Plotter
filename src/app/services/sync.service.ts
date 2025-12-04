@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { HoverEvent, ZoomEvent, TimeRange } from '../models/data.model';
+import { HoverEvent, TimeRange } from '../models/data.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,6 @@ export class SyncService {
   constructor() { }
 
   public emitHover(event: HoverEvent | null): void {
-    console.log('SyncService emitting hover:', event?.dataPoint?.datetime, event?.dataPoint?.latitude, event?.dataPoint?.longitude);
     this.hoverSubject.next(event);
   }
 
@@ -36,7 +35,6 @@ export class SyncService {
       };
     }
     
-    console.log('SyncService emitting zoom:', timeRange);
     this.zoomSubject.next(timeRange);
   }
 

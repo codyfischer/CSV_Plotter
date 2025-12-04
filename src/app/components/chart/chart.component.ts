@@ -47,22 +47,8 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(): void {
-    console.log('Chart ngOnChanges called for field:', this.field?.key, 'data length:', this.data.length);
-    
-    // Debug: Log sample data to see null values
-    if (this.data.length > 0) {
-      const sampleData = this.data.slice(0, 5);
-      console.log('Sample data for field:', this.field?.key, sampleData.map(d => ({
-        datetime: d.datetime,
-        value: d[this.field.key],
-        type: typeof d[this.field.key],
-        isNull: d[this.field.key] === null
-      })));
-    }
-    
     if (this.svg && this.data.length > 0) {
       this.decimatedData = this.decimateData(this.data);
-      console.log('Decimated data length:', this.decimatedData.length);
       this.updateChart();
     }
   }
@@ -79,11 +65,8 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private decimateData(data: DataPoint[]): DataPoint[] {
-    console.log(`decimateData: input length ${data.length} for field ${this.field?.key}`);
-    
     // More conservative decimation - keep more points for better zoom experience
     if (data.length <= 2000) {
-      console.log('decimateData: returning original data (small/medium dataset)');
       return data;
     }
 
@@ -101,7 +84,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       decimated.push(data[data.length - 1]);
     }
     
-    console.log(`Decimated data from ${data.length} to ${decimated.length} points for ${this.field.key}`);
     return decimated;
   }
 
@@ -109,12 +91,10 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
     this.syncService.zoom$
       .pipe(takeUntil(this.destroy$))
       .subscribe(timeRange => {
-        console.log('Chart received zoom event:', this.field.key, timeRange);
         if (timeRange && timeRange !== this.currentTimeRange) {
           this.currentTimeRange = timeRange;
           this.applyZoom(timeRange);
         } else if (!timeRange) {
-          console.log('Resetting zoom for chart:', this.field.key);
           this.resetZoom();
         }
       });
@@ -123,16 +103,12 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
   private initChart(): void {
     const element = this.chartContainer.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
-    console.log('initChart called for field:', this.field.key, 'element width:', element.offsetWidth, 'chart width:', this.width);
 
     const svgElement = d3.select(element)
       .append('svg')
       .attr('width', this.width + this.margin.left + this.margin.right)
       .attr('height', this.height)
-      .style('pointer-events', 'all')
-      .on('mousemove', (event: any) => {
-        console.log('SVG MOUSE MOVE for field:', this.field.key);
-      });
+      .style('pointer-events', 'all');
     
     this.svg = svgElement
       .append('g')
@@ -151,7 +127,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       .y(d => {
         const value = d[this.field.key] as number;
         if (value === undefined || value === null || isNaN(value)) {
-          console.log('Invalid y value for point:', d, 'field:', this.field.key, 'value:', value);
           return 0;
         }
         return this.yScale(value);
@@ -253,15 +228,11 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       .style('fill', 'none')
       .style('pointer-events', 'all')
       .on('mousemove', (event: any) => {
-        console.log('Mouse move detected on chart:', this.field.key);
         this.mouseMoveSubject$.next(event);
       })
       .on('mouseleave', () => {
-        console.log('Mouse leave detected on chart:', this.field.key);
         this.onMouseLeave();
       });
-    
-    console.log('Hover overlay created for field:', this.field.key, 'width:', this.width, 'height:', this.actualHeight);
 
     // Add brush for zooming (on top)
     this.brush = d3.brushX()
@@ -290,12 +261,10 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
 
   private updateChart(): void {
     if (!this.svg || this.data.length === 0) {
-      console.log('updateChart: No svg or no data');
       return;
     }
 
     if (!this.decimatedData || this.decimatedData.length === 0) {
-      console.log('updateChart: No decimated data');
       return;
     }
 
@@ -308,8 +277,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       .filter(v => v !== null && v !== undefined && !isNaN(v));
     
     const valueExtent = d3.extent(validValues) as [number, number];
-    
-    console.log('updateChart: timeExtent:', timeExtent, 'valueExtent:', valueExtent, 'decimated length:', this.decimatedData.length);
 
     this.xScale.domain(timeExtent);
     this.yScale.domain(valueExtent);
@@ -346,17 +313,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     const linePathData = this.line(this.decimatedData);
-    console.log('updateChart: line path data:', linePathData ? 'generated' : 'null', 'first few points:', this.decimatedData.slice(0, 3));
-    
-    // Debug: Check which points are being filtered out by the line generator
-    const definedPoints = this.decimatedData.filter(d => {
-      const x = this.xScale(d.datetime);
-      const y = d[this.field.key] as number;
-      return x >= 0 && x <= this.width && !isNaN(x) && 
-             y !== null && y !== undefined && !isNaN(y);
-    });
-    console.log('Points defined by line generator:', definedPoints.length, 'out of', this.decimatedData.length);
-    console.log('Filtered out points:', this.decimatedData.length - definedPoints.length);
 
     // Clear existing lines and create new one
     lineGroup.selectAll('.line').remove();
@@ -450,9 +406,7 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private onBrush(event: any): void {
-    console.log('Brush event triggered:', event);
     if (!event.selection) {
-      console.log('No brush selection');
       return;
     }
 
@@ -460,7 +414,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
     const start = this.xScale.invert(x0);
     const end = this.xScale.invert(x1);
 
-    console.log('Brush selection:', { x0, x1, start, end });
     const timeRange: TimeRange = { start, end };
     this.syncService.emitZoom(timeRange);
     
@@ -573,7 +526,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
         x: event.clientX,
         y: event.clientY
       };
-      console.log('Chart emitting hover event:', this.field.key, hoverEvent.dataPoint.datetime, hoverEvent.dataPoint.latitude, hoverEvent.dataPoint.longitude);
       this.syncService.emitHover(hoverEvent);
     }
   }
@@ -598,14 +550,12 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
 
   private applyZoom(timeRange: TimeRange): void {
     if (this.isUpdatingZoom) {
-      console.log('Zoom update already in progress, skipping');
       return;
     }
     
     this.isUpdatingZoom = true;
     
     try {
-      console.log('Applying zoom to chart:', this.field.key, timeRange);
       this.xScale.domain([timeRange.start, timeRange.end]);
       
       // Update axis with dynamic formatting based on zoom level
@@ -632,12 +582,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       const visibleData = this.data.filter(d => 
         d.datetime >= timeRange.start && d.datetime <= timeRange.end
       );
-      
-      // Additional safety check: ensure no data points fall outside the x-scale domain
-      const xDomain = this.xScale.domain();
-      console.log('Zoom: X-scale domain:', xDomain);
-      console.log('Zoom: Visible data range:', 
-        visibleData.length > 0 ? [visibleData[0].datetime, visibleData[visibleData.length - 1].datetime] : 'No data');
 
       // Use full resolution data when zoomed in for better granularity
       // Simple approach: only decimate if we have too many visible points
@@ -655,17 +599,10 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
         if (finalData[finalData.length - 1] !== visibleData[visibleData.length - 1]) {
           finalData.push(visibleData[visibleData.length - 1]);
         }
-        console.log(`Simple decimating zoomed data: ${visibleData.length} -> ${finalData.length} points`);
-      } else {
-        console.log(`Using full resolution: ${visibleData.length} points`);
       }
 
       // Update line with final data - force redraw by removing and recreating
       const lineGroup = this.svg.select('.line-group');
-      console.log('Zoom: Updating line with', finalData.length, 'points');
-      console.log('Zoom: Line group found:', !lineGroup.empty());
-      console.log('Zoom: xScale domain:', this.xScale.domain());
-      console.log('Zoom: yScale domain:', this.yScale.domain());
       
       // Update the y-scale domain for the visible data, filtering out null values
       const validVisibleValues = finalData
@@ -679,15 +616,12 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       this.svg.select('.y-axis')
         .call(d3.axisLeft(this.yScale));
       
-      console.log('Apply zoom: y-axis domain adjusted to visible range:', this.yScale.domain());
-      
       // Update centerline position for zoomed view
       this.updateCenterline();
       
       // Ensure line group has proper clipping to prevent extending beyond boundaries
       if (!lineGroup.attr('clip-path')) {
         lineGroup.attr('clip-path', `url(#clip-${this.field.key})`);
-        console.log('Zoom: Applied clip-path to line group');
       }
       
       lineGroup.selectAll('.line').remove();
@@ -705,13 +639,7 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
       
       // Generate and set the path data with boundary constraints
       const pathData = this.line(finalData);
-      console.log('Zoom: Generated path data:', pathData ? 'success' : 'failed', pathData?.substring(0, 50) + '...');
       newPath.attr('d', pathData);
-      
-      // Ensure the line is properly clipped to prevent extending beyond boundaries
-      if (lineGroup.attr('clip-path')) {
-        console.log('Zoom: Line group has clip-path, ensuring proper clipping');
-      }
       
     } catch (error) {
       console.error('Error in applyZoom:', error);
@@ -750,8 +678,6 @@ export class ChartComponent implements OnInit, OnDestroy, OnChanges {
     // Update y-axis with full data range
     this.svg.select('.y-axis')
       .call(d3.axisLeft(this.yScale));
-    
-    console.log('Reset zoom: y-axis domain reset to full range:', this.yScale.domain());
 
     // Update centerline position for reset view
     this.updateCenterline();

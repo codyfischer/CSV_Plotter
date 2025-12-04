@@ -27,7 +27,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.csvService.data$
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        console.log('App component received data:', data.length, 'data points');
         this.data = data;
         
         // Set data bounds for zoom constraints
@@ -46,7 +45,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.csvService.availableFields$
       .pipe(takeUntil(this.destroy$))
       .subscribe(fields => {
-        console.log('Available fields updated:', fields);
         this.availableFields = fields;
         // Auto-select first few fields when new data is loaded
         this.selectedFields = fields.filter(f => f.selected);
@@ -66,19 +64,14 @@ export class AppComponent implements OnInit, OnDestroy {
       color: DEFAULT_COLORS[this.selectedFields.length % DEFAULT_COLORS.length]
     };
     this.selectedFields = [...this.selectedFields, selectedField];
-    console.log('Field selected:', selectedField.key);
   }
 
   onFieldRemoved(field: PlotField): void {
     this.selectedFields = this.selectedFields.filter(f => f.key !== field.key);
-    console.log('Field removed:', field.key);
   }
 
   onFileUpload(file: File): void {
     this.csvService.parseFile(file)
-      .then(data => {
-        console.log('File uploaded successfully:', data.length, 'data points');
-      })
       .catch(error => {
         console.error('Error parsing file:', error);
       });
