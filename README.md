@@ -1,4 +1,6 @@
-# CSV Plotter
+# Cody's CSV Plotter
+
+Load CSV file containing at least fields "datetime", "Latitude" and "Longitude"
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
 
